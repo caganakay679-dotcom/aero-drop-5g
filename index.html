@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AERO-DROP Kontrol Paneli | 5G Takımı</title>
+<style>
+:root{--bg:#06142e;--n2:#0b2545;--n3:#123662;--t:#00f5d4;--m:#8fa8c8;--a:#ffb703;--r:#ff5468;--ln:rgba(0,245,212,.22)}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html{background:#06142e}
+body{font:14px/1.45 "Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#fff;background:radial-gradient(circle at 85% 0,#13315c,#0b2545 45%,#06142e);min-height:100vh}
+.wrap{max-width:1180px;margin:auto;padding:14px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.brand h1{font-size:26px;letter-spacing:.02em;line-height:1}
+.brand h1 span{color:var(--t)}
+.brand p{color:var(--m);font-size:12px;max-width:380px}
+.hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{border:1px solid var(--ln);border-radius:99px;padding:4px 11px;font-size:12px;font-weight:700;background:rgba(0,245,212,.08);color:var(--t)}
+.chip.red{background:#e63946;border-color:#e63946;color:#fff}
+.seg{display:inline-flex;border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-top:12px}
+.seg button{background:transparent;color:var(--m);border:0;padding:10px 16px;font-weight:700;cursor:pointer;min-height:44px}
+.seg button[aria-pressed=true]{background:var(--t);color:#06142e}
+body[data-mode=sim] #mSim[aria-pressed=true]{background:var(--a)}
+.banner{margin-top:10px;border-radius:12px;padding:10px 14px;border:1px solid var(--ln);background:rgba(0,245,212,.08);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.banner.warn{border:1px dashed var(--a);background:repeating-linear-gradient(135deg,rgba(255,183,3,.12) 0 10px,rgba(255,183,3,.04) 10px 20px)}
+.banner.err{border-color:var(--r);background:rgba(255,84,104,.12)}
+.banner a{color:var(--t);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.card{background:rgba(11,37,69,.78);border:1px solid var(--ln);border-radius:14px;padding:14px;box-shadow:0 10px 26px rgba(0,0,0,.35)}
+body[data-mode=sim] .card{border-style:dashed;border-color:rgba(255,183,3,.45)}
+.k small,.ct{color:var(--m);font-size:12px}
+.k b{display:flex;gap:8px;align-items:center;font-size:17px;margin-top:2px}
+.ct{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-weight:700;font-size:13px;color:#cfe0f5}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;background:#5b6f8f}
+.dot.on{background:var(--t);box-shadow:0 0 8px var(--t)}.dot.warn{background:var(--a)}.dot.err{background:var(--r)}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+.side{display:grid;gap:12px;align-content:start}
+.stage{position:relative;background:#06142e;border:1px solid rgba(143,168,200,.25);border-radius:12px;padding:6px}
+.stage svg{width:100%;height:auto;max-height:260px;display:block}
+.ov{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;font-weight:800;letter-spacing:.1em;pointer-events:none;border-radius:12px;padding:10px}
+.ov.hw{display:flex;background:rgba(6,20,46,.72);color:var(--a)}
+.ov.sim{display:flex;color:rgba(255,183,3,.28);font-size:30px;transform:rotate(-10deg)}
+.hl,.hrr{transition:transform 1.2s cubic-bezier(.34,1.56,.64,1);transform-box:view-box}
+.hl{transform-origin:85px 108px}.hrr{transform-origin:215px 108px}
+.open .hl{transform:rotate(52deg)}.open .hrr{transform:rotate(-52deg)}
+.pay{transition:transform .9s cubic-bezier(.55,.06,.68,.19),opacity .8s}
+.nopay .pay{transform:translateY(85px);opacity:0}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{min-height:46px;border-radius:12px;border:1px solid var(--ln);background:var(--n3);color:#fff;font:700 14px inherit;font-family:inherit;padding:0 14px;cursor:pointer;transition:border-color .15s,transform .1s}
+.btn:hover:not(:disabled){border-color:var(--t)}.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.seg button:focus-visible,input:focus-visible{outline:2px solid var(--t);outline-offset:2px}
+.btn.drop{background:linear-gradient(90deg,#e63946,#b5121f);border-color:#e63946}
+.btn.lock{background:linear-gradient(90deg,#00b4d8,#0077b6);border-color:#00b4d8}
+.btn.sm{min-height:36px;font-size:12px;padding:0 10px}
+.hint{color:var(--m);font-size:12px;margin-top:8px;min-height:18px}
+.sv{border-top:1px solid rgba(143,168,200,.18);padding:10px 0}
+.sv:first-of-type{border-top:0}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.gauge{position:relative;height:8px;border-radius:4px;background:#0a1d3d;margin:8px 0 2px;border:1px solid rgba(143,168,200,.25)}
+.gauge i{position:absolute;top:-3px;width:2px;height:12px;background:var(--m)}
+.gauge u{position:absolute;top:-4px;width:12px;height:14px;margin-left:-6px;border-radius:3px;background:var(--t);transition:left .3s}
+.bat{height:10px;border-radius:5px;background:#0a1d3d;overflow:hidden;margin:6px 0 10px}
+.bat i{display:block;height:100%;width:0;background:var(--t);transition:width .4s}
+.bat i.warn{background:var(--a)}.bat i.err{background:var(--r)}
+dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px}
+dt{color:var(--m)}dd{text-align:right}
+form{display:flex;gap:6px;margin-top:10px}
+input{flex:1;min-width:0;min-height:36px;border-radius:10px;border:1px solid var(--ln);background:#06142e;color:#fff;padding:0 10px;font:inherit}
+input:disabled{opacity:.45}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button[aria-pressed=true]{background:var(--t);color:#06142e;border-color:var(--t)}
+ul{list-style:none;padding:0;max-height:270px;overflow:auto;border:1px solid rgba(143,168,200,.2);border-radius:10px;background:#06142e}
+li{display:grid;grid-template-columns:62px 54px 50px 1fr;gap:8px;padding:6px 10px;border-bottom:1px solid rgba(143,168,200,.12);font-size:12.5px}
+li time{font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--m)}
+.tag{font-size:11px}.tag.HW{color:var(--t)}.tag.SIM{color:var(--a)}
+.lvl{font-style:normal;font-weight:700;font-size:11px}
+.lvl.OK{color:var(--t)}.lvl.WARN{color:var(--a)}.lvl.ERR{color:var(--r)}.lvl.INFO{color:var(--m)}
+li:has(.ERR){background:rgba(255,84,104,.08)}
+footer{margin:14px 0 4px;color:var(--m);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.mdl{position:fixed;inset:0;background:rgba(3,10,24,.8);display:flex;align-items:center;justify-content:center;padding:14px;z-index:9}
+.mdl>div{background:var(--n2);border:1px solid var(--t);border-radius:14px;padding:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.mdl h3{margin-bottom:8px}.mdl p,.mdl li{margin:6px 0}
+.mdl ol{padding-left:20px}.mdl li{display:list-item;border:0;padding:0;background:none;font-size:13.5px}
+.mdl code{font-size:12px;color:var(--t);word-break:break-all}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+@media(max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}li{grid-template-columns:56px 1fr;}li .tag,li .lvl{display:inline}li span{grid-column:1/3}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body data-mode="hw">
+<div class="wrap">
+<header>
+ <div class="brand">
+  <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><rect x="1" y="1" width="44" height="44" rx="12" fill="#0b2545" stroke="#00f5d4" stroke-width="2"/><path d="M23 9v18M14 27h18" stroke="#00f5d4" stroke-width="3" stroke-linecap="round"/><path d="M23 37l-5-6h10z" fill="#fff"/></svg>
+  <div><h1>AERO-<span>DROP</span></h1><p>Modüler ve Kablosuz Kontrollü Akıllı Faydalı Yük Bırakma Sistemi</p></div>
+ </div>
+ <div class="hr"><span class="chip red">Deneyap Kart v2 · ESP32-S3</span><span class="chip">5G Takımı</span><span class="chip mono" id="clk">--:--:--</span><button class="btn sm" id="bGuide" type="button">Rehber</button></div>
+</header>
+<div class="seg" role="group" aria-label="Çalışma modu"><button id="mHw" type="button" aria-pressed="true">Gerçek donanım</button><button id="mSim" type="button" aria-pressed="false">Simülasyon</button></div>
+<div id="banner" class="banner" role="status" aria-live="polite"><b id="bt"></b><span id="bd"></span><a id="bl" href="http://192.168.4.1" target="_blank" rel="noopener" hidden>Gerçek paneli aç (192.168.4.1)</a></div>
+
+<section class="kpis" aria-label="Özet">
+ <div class="card k"><small>ESP32 bağlantısı</small><b><i class="dot" id="kd"></i><span id="k1">-</span></b></div>
+ <div class="card k"><small>Kancalar</small><b id="k2">-</b></div>
+ <div class="card k"><small>Gecikme</small><b class="mono" id="k3">-</b></div>
+ <div class="card k"><small id="k4l">Batarya</small><b class="mono" id="k4">-</b></div>
+</section>
+
+<div class="grid">
+ <section class="card" aria-label="Mekanizma">
+  <div class="ct"><span>Yük bırakma mekanizması · 10x10 cm gövde</span><span class="mono" id="pw"></span></div>
+  <div class="stage">
+   <svg id="svg" viewBox="0 0 300 185" role="img" aria-label="Çift servolu kanca mekanizması animasyonu">
+    <rect x="65" y="14" width="170" height="72" rx="10" fill="#12294d" stroke="#00f5d4" stroke-width="2"/>
+    <line x1="65" y1="32" x2="235" y2="32" stroke="#2a4670" stroke-width="1.5"/>
+    <text x="150" y="26" text-anchor="middle" fill="#9fb6d6" font-size="8" font-weight="700">10x10 CM MODÜLER GÖVDE</text>
+    <rect x="108" y="42" width="84" height="24" rx="5" fill="#06142e" stroke="#38bdf8"/><text x="150" y="57" text-anchor="middle" fill="#00f5d4" font-size="8.5" font-weight="800">DENEYAP v2</text>
+    <rect x="50" y="56" width="38" height="44" rx="5" fill="#0284c7" stroke="#bae6fd" stroke-width="1.5"/><text x="69" y="76" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="800">SG90</text><text x="69" y="86" text-anchor="middle" fill="#e0f2fe" font-size="6.5">S1 · D4</text><circle cx="85" cy="108" r="7" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+    <rect x="212" y="56" width="38" height="44" rx="5" fill="#0284c7" stroke="#bae6fd" stroke-width="1.5"/><text x="231" y="76" text-anchor="middle" fill="#fff" font-size="7.5" font-weight="800">SG90</text><text x="231" y="86" text-anchor="middle" fill="#e0f2fe" font-size="6.5">S2 · D5</text><circle cx="215" cy="108" r="7" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+    <g class="hl"><path d="M85 108V132Q85 144 102 144H138" fill="none" stroke="#00f5d4" stroke-width="6" stroke-linecap="round"/><circle cx="85" cy="108" r="3" fill="#06142e"/></g>
+    <g class="hrr"><path d="M215 108V132Q215 144 198 144H162" fill="none" stroke="#00f5d4" stroke-width="6" stroke-linecap="round"/><circle cx="215" cy="108" r="3" fill="#06142e"/></g>
+    <g class="pay"><path d="M126 144v-10Q150 124 174 134v10" fill="none" stroke="#f59e0b" stroke-width="3"/><rect x="115" y="142" width="70" height="36" rx="6" fill="#d97706" stroke="#fde68a" stroke-width="1.5"/><rect x="147" y="149" width="6" height="14" rx="1" fill="#fff"/><rect x="143" y="153" width="14" height="6" rx="1" fill="#fff"/><text x="150" y="173" text-anchor="middle" fill="#fef3c7" font-size="6.5" font-weight="800">YARDIM KİTİ</text></g>
+   </svg>
+   <div id="ov" class="ov" aria-hidden="true"></div>
+  </div>
+  <div class="acts">
+   <button class="btn drop" id="bDrop" type="button">Yükü bırak (kancaları aç)</button>
+   <button class="btn lock" id="bLock" type="button">Kancaları kilitle</button>
+  </div>
+  <div class="row"><p class="hint" id="bHint"></p><button class="btn sm" id="bLoad" type="button" title="Yükü elle taktığınızı panele bildirir">Yük takıldı</button></div>
+ </section>
+
+ <div class="side">
+  <section class="card" aria-label="Servolar">
+   <div class="ct"><span>Servo durumları · SG90 360°</span></div>
+   <div class="sv"><div class="row"><b>Servo 1 · D4</b><b id="s0s">-</b></div><div class="gauge"><i style="left:48%"></i><u id="s0g"></u></div><div class="row"><small class="mono" id="s0p">-</small><small>Durma noktası 1480 µs</small></div></div>
+   <div class="sv"><div class="row"><b>Servo 2 · D5</b><b id="s1s">-</b></div><div class="gauge"><i style="left:50%"></i><u id="s1g"></u></div><div class="row"><small class="mono" id="s1p">-</small><small>Durma noktası 1500 µs</small></div></div>
+   <p class="hint">Sürekli dönen servolarda konum geri bildirimi yoktur; durum komut ve telemetriden türetilir.</p>
+  </section>
+
+  <section class="card" aria-label="Batarya ve sistem">
+   <div class="ct"><span>Batarya ve sistem</span><span id="sysTag"></span></div>
+   <div class="row"><b class="mono" id="bv">-</b><b class="mono" id="bp">-</b></div>
+   <div class="bat"><i id="bb"></i></div>
+   <dl><dt>Çalışma süresi</dt><dd class="mono" id="up">-</dd><dt>Bağlı cihaz</dt><dd class="mono" id="cl">-</dd><dt>Boş bellek</dt><dd class="mono" id="mem">-</dd></dl>
+  </section>
+
+  <section class="card" aria-label="Bağlantı">
+   <div class="ct"><span>ESP32 bağlantısı</span><button class="btn sm" id="bTest" type="button">Bağlantıyı test et</button></div>
+   <dl><dt>Wi-Fi ağı</dt><dd>AeroDrop_Kontrol</dd><dt>Adres</dt><dd class="mono" id="cAddr">-</dd><dt>Son yanıt</dt><dd class="mono" id="cLast">-</dd><dt>Ardışık hata</dt><dd class="mono" id="cFail">-</dd><dt>Telemetri</dt><dd id="cTel">-</dd></dl>
+   <form id="aForm"><input id="aIn" aria-label="Cihaz adresi" placeholder="192.168.4.1" autocomplete="off"><button class="btn sm" type="submit" id="aBtn">Kaydet</button></form>
+  </section>
+ </div>
+</div>
+
+<section class="card" style="margin-top:12px" aria-label="İşlem geçmişi">
+ <div class="ct"><span>İşlem geçmişi ve hata kayıtları</span>
+  <span class="tabs"><button class="btn sm" data-f="all" aria-pressed="true" type="button">Tümü</button><button class="btn sm" data-f="hw" aria-pressed="false" type="button">Gerçek</button><button class="btn sm" data-f="sim" aria-pressed="false" type="button">Simülasyon</button><button class="btn sm" data-f="err" aria-pressed="false" type="button">Hatalar</button><button class="btn sm" id="bCopy" type="button">Kopyala</button><button class="btn sm" id="bClr" type="button">Temizle</button></span></div>
+ <ul id="log" aria-live="off"></ul>
+</section>
+<footer><span>5. Faz Deneyap Final Sergisi · 5G Takımı</span><span>AERO-DROP kontrol paneli v2.0</span></footer>
+</div>
+
+<div class="mdl" id="mdl" hidden><div role="dialog" aria-modal="true" aria-labelledby="mT"><h3 id="mT"></h3><div id="mB"></div><div class="ma" id="mA"></div></div></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(i){return document.getElementById(i)};
+var T=function(i,v){var e=$(i);if(e&&e.textContent!==String(v))e.textContent=v};
+var el=function(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+var C={stop:[1480,1500],mv:{drop:[1650,1650],lock:[1300,1300]},moveMs:1500,to:2500,poll:3000,max:150,def:'http://192.168.4.1'};
+var store={g:function(k){try{return localStorage.getItem(k)}catch(e){return null}},s:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+var dev=location.hostname==='192.168.4.1';
+var addr=store.g('aero_addr')||C.def;
+var base=function(){return dev?'':addr};
+var blocked=function(){return location.protocol==='https:'&&!dev&&/^http:/i.test(addr)};
+var hms=function(d){return d.toLocaleTimeString('tr-TR',{hour12:false})};
+var mk=function(){return{lock:'unknown',loaded:true,moving:false,pwm:null,info:null}};
+var S={mode:'hw',busy:false,beating:false,filt:'all',conn:'idle',rtt:null,last:null,fails:0,hw:mk(),sim:mk(),t0:Date.now()};
+S.sim.lock='locked';S.sim.pwm=C.stop.slice();
+var live=function(){return S.conn==='online'||S.conn==='partial'};
+var L=[];
+
+function log(lv,msg,src){L.unshift({t:new Date(),lv:lv,msg:msg,src:src||(S.mode==='sim'?'SIM':'HW')});if(L.length>C.max)L.pop();rLog()}
+function rLog(){var u=$('log'),f=S.filt,n=0,LV={INFO:'BİLGİ',OK:'OK',WARN:'UYARI',ERR:'HATA'};u.textContent='';
+ L.forEach(function(e){if((f==='hw'&&e.src!=='HW')||(f==='sim'&&e.src!=='SIM')||(f==='err'&&e.lv!=='ERR'&&e.lv!=='WARN'))return;n++;
+  var li=el('li');li.append(el('time','',hms(e.t)),el('b','tag '+e.src,e.src==='HW'?'GERÇEK':'SİM'),el('i','lvl '+e.lv,LV[e.lv]),el('span','',e.msg));u.append(li)});
+ if(!n){var li=el('li');li.style.display='block';li.textContent='Bu filtre için kayıt yok.';u.append(li)}}
+
+function ctl(ms){var c=new AbortController(),t=setTimeout(function(){c.abort()},ms);return{s:c.signal,x:function(){clearTimeout(t)}}}
+async function req(p){var k=ctl(C.to),t0=performance.now();
+ try{var r=await fetch(base()+p,{cache:'no-store',signal:k.s});var tx=await r.text();k.x();return{ok:r.ok,st:r.status,tx:tx,rtt:Math.round(performance.now()-t0)}}
+ catch(e){k.x();if(e&&e.name==='AbortError')return{err:'timeout'};
+  var k2=ctl(C.to);try{await fetch(base()+'/',{mode:'no-cors',cache:'no-store',signal:k2.s});k2.x();return{err:'cors'}}catch(_){k2.x();return{err:'net'}}}}
+
+function setConn(st,why){if(S.conn===st)return;S.conn=st;
+ var m={online:['OK','ESP32 bağlantısı kuruldu, telemetri alınıyor'],partial:['WARN','ESP32 yanıt veriyor ancak telemetri okunamıyor (/DURUM yok ya da CORS başlığı eksik)'],offline:['ERR','ESP32’ye ulaşılamıyor'+(why?' — '+why:'')],blocked:['ERR','HTTPS sayfasından HTTP cihaza istek tarayıcı tarafından engelleniyor'],idle:['INFO','Bağlantı kontrol ediliyor']}[st];
+ log(m[0],m[1],'HW')}
+
+function tel(j){var M=S.hw,n=function(v){return typeof v==='number'&&isFinite(v)?v:null};
+ M.pwm=(n(j.s1)!=null&&n(j.s2)!=null)?[j.s1,j.s2]:null;
+ if(!M.moving){if(j.kilit==='kilitli')M.lock='locked';else if(j.kilit==='acik')M.lock='open'}
+ M.info={v:n(j.pil_v),p:n(j.pil_yuzde),up:n(j.sure),cl:n(j.istemci),mem:n(j.bellek)}}
+
+async function beat(manual){
+ if(S.mode!=='hw'||S.beating)return;
+ if(blocked()){setConn('blocked');render();return}
+ S.beating=true;if(manual)log('INFO','Bağlantı testi: '+(dev?location.host:addr),'HW');
+ var r=await req('/DURUM');S.beating=false;if(S.mode!=='hw')return;
+ var M=S.hw,j=null;
+ if(r.ok||r.st){S.rtt=r.rtt;S.last=new Date();S.fails=0;
+  if(r.ok){try{j=JSON.parse(r.tx)}catch(e){}}
+  if(j&&typeof j==='object'){tel(j);setConn('online')}else{M.pwm=null;M.info=null;setConn('partial')}}
+ else if(r.err==='cors'){S.last=new Date();S.fails=0;M.pwm=null;M.info=null;setConn('partial')}
+ else{S.fails++;S.rtt=null;M.pwm=null;M.info=null;setConn('offline',r.err==='timeout'?'zaman aşımı ('+C.to+' ms)':'ağ hatası')}
+ render()}
+
+function mv(M){M.moving=true;setTimeout(function(){M.moving=false;render()},C.moveMs)}
+function sim(drop){var M=S.sim;M.lock=drop?'open':'locked';if(drop)M.loaded=false;M.moving=true;M.pwm=(drop?C.mv.drop:C.mv.lock).slice();render();
+ setTimeout(function(){M.moving=false;M.pwm=C.stop.slice();log('OK',(drop?'Kancalar açıldı, yük bırakıldı':'Kancalar kilitlendi')+' (simüle)','SIM');render()},C.moveMs)}
+var snip=function(t){if(!t||/^\s*</.test(t))return'';t=t.trim().slice(0,60);return t?' — “'+t+'”':''};
+
+async function act(k){
+ var M=S[S.mode];if(S.busy||M.moving)return;
+ var drop=k==='drop',p=drop?'/BIRAK':'/KAPAT',nm=drop?'Yükü bırak':'Kancaları kilitle';
+ if(S.mode==='sim'){log('INFO','“'+nm+'” simülasyonu başlatıldı — donanıma komut gönderilmedi');return sim(drop)}
+ if(!live())return;
+ if(drop&&!(await ask('Yük bırakılsın mı?','<p>Gerçek donanıma <code>/BIRAK</code> komutu gönderilecek ve yük serbest kalacak.</p>','Yükü bırak'))){log('INFO','/BIRAK komutu operatör tarafından iptal edildi','HW');return}
+ S.busy=true;render();log('INFO',p+' komutu gönderiliyor…');
+ var r=await req(p);S.busy=false;
+ if(r.ok){S.rtt=r.rtt;S.last=new Date();M.lock=drop?'open':'locked';if(drop)M.loaded=false;mv(M);log('OK',p+' ESP32 tarafından onaylandı (HTTP '+r.st+', '+r.rtt+' ms)'+snip(r.tx))}
+ else if(r.st){log('ERR',p+' reddedildi: HTTP '+r.st+'. Mekanizma durumu değişmedi.')}
+ else if(r.err==='timeout'){M.lock='unknown';setConn('offline','zaman aşımı');log('ERR',p+' zaman aşımına uğradı ('+C.to+' ms). Komutun uygulanıp uygulanmadığı doğrulanamadı.')}
+ else if(r.err==='cors'){M.lock='unknown';setConn('partial');log('WARN',p+' gönderildi ancak yanıt okunamadı (CORS). Sonuç doğrulanmadı.')}
+ else{setConn('offline','ağ hatası');log('ERR',p+' gönderilemedi: ESP32’ye ulaşılamıyor. İşlem başarısız.')}
+ render()}
+
+/* Modal */
+var mRes=null;
+function showM(t,h,bs){T('mT',t);$('mB').innerHTML=h;var a=$('mA');a.textContent='';bs.forEach(function(b){var x=el('button','btn '+(b.c||''),b.t);x.type='button';x.onclick=b.f;a.append(x)});$('mdl').hidden=false;a.lastChild.focus()}
+function closeM(v){$('mdl').hidden=true;if(mRes){var r=mRes;mRes=null;r(v)}}
+function ask(t,h,ok){return new Promise(function(res){mRes=res;showM(t,h,[{t:'Vazgeç',f:function(){closeM(false)}},{t:ok,c:'drop',f:function(){closeM(true)}}])})}
+var GUIDE='<ol><li>Telefon ya da bilgisayarı <b>AeroDrop_Kontrol</b> Wi-Fi ağına bağlayın (internet olmaması normaldir).</li><li>Paneli ESP32 üzerinden açın: <code>http://192.168.4.1</code>. Aynı kaynaktan açıldığı için ek ayar gerekmez.</li><li>Google Sites gibi HTTPS sayfalarda tarayıcı, HTTP olan ESP32’ye isteği engeller. Orada panel simülasyon modunda çalışır; gerçek kontrol için yukarıdaki adresi kullanın.</li><li>Paneli başka bir adresten (yerel dosya vb.) açarsanız ESP32 yanıtlarına <code>Access-Control-Allow-Origin: *</code> başlığı ekleyin.</li><li>Komutlar: <code>/BIRAK</code> ve <code>/KAPAT</code>. Servo ve batarya verisi için ESP32 <code>/DURUM</code> yolunda JSON döndürmelidir (tüm alanlar isteğe bağlı):<br><code>{"kilit":"kilitli","s1":1480,"s2":1500,"pil_v":7.4,"pil_yuzde":82,"sure":120,"istemci":1,"bellek":210000}</code></li></ol><p>Veri gelmeyen alanlar “-” olarak görünür; panel eksik veriyi hiçbir zaman uydurmaz.</p>';
+
+/* Render */
+var lockTx={locked:'Kilitli',open:'Açık',unknown:'Doğrulanmadı'};
+var CL={idle:['Kontrol ediliyor','warn'],online:['Bağlı','on'],partial:['Bağlı · telemetri yok','on'],offline:['Bağlantı yok','err'],blocked:['Engellendi (HTTPS)','err'],sim:['Simülasyon','warn']};
+var fmtUp=function(s){s=Math.floor(s);return Math.floor(s/3600)+' sa '+Math.floor(s%3600/60)+' dk '+s%60+' sn'};
+function render(){
+ var m=S.mode,hw=m==='hw',M=S[m],c=hw?S.conn:'sim',cl=CL[c],lv=!hw||live();
+ document.body.dataset.mode=m;$('mHw').setAttribute('aria-pressed',hw);$('mSim').setAttribute('aria-pressed',!hw);
+ var B={sim:['warn','Simülasyon modu','Tüm değerler sanaldır. ESP32’ye hiçbir komut gönderilmez.'],blocked:['err','Gerçek donanım · engellendi','Sayfa HTTPS üzerinde açıldı; tarayıcı HTTP olan ESP32’ye isteği engeller. Wi-Fi ağı AeroDrop_Kontrol’e bağlanıp paneli ESP32’den açın.'],offline:['err','Gerçek donanım · bağlantı yok','ESP32 yanıt vermiyor. Komutlar kapalı; hiçbir işlem başarılı sayılmaz.'],idle:['warn','Gerçek donanım · bağlanılıyor','ESP32 aranıyor…'],online:['ok','Gerçek donanım · bağlı','Komutlar doğrudan servolara iletilir.'],partial:['ok','Gerçek donanım · bağlı (telemetri yok)','ESP32 yanıt veriyor. Servo ve batarya verisi için /DURUM gerekir (Rehber).']}[hw?S.conn:'sim'];
+ $('banner').className='banner '+B[0];T('bt',B[1]);T('bd',B[2]);$('bl').hidden=!(hw&&S.conn==='blocked');
+ T('k1',cl[0]);$('kd').className='dot '+cl[1];
+ T('k2',!lv?'Veri yok':M.moving?'Hareket':lockTx[M.lock]);
+ T('k3',hw&&live()&&S.rtt!=null?S.rtt+' ms':'-');
+ var I=M.info,pc=I&&I.p!=null?I.p:null;
+ T('k4l',hw?'Batarya':'Batarya (sanal)');T('k4',pc!=null?Math.round(pc)+' %':'-');
+ /* mekanizma */
+ var sv=$('svg');sv.classList.toggle('open',M.lock==='open');sv.classList.toggle('nopay',!M.loaded);
+ var ov=$('ov');
+ if(!hw){ov.className='ov sim';ov.textContent='SİMÜLASYON'}
+ else if(!live()){ov.className='ov hw';ov.textContent=S.conn==='blocked'?'ENGELLENDİ · VERİ YOK':'BAĞLANTI YOK · DURUM BİLİNMİYOR'}
+ else if(M.lock==='unknown'){ov.className='ov hw';ov.textContent='DURUM DOĞRULANMADI'}
+ else ov.className='ov';
+ T('pw',hw?'':'sanal');
+ var off=S.busy||M.moving||(hw&&!live());
+ $('bDrop').disabled=off;$('bLock').disabled=off;
+ $('bLoad').disabled=M.loaded||M.lock==='open'||M.moving;
+ T('bHint',hw&&!live()?'Komutlar için ESP32 bağlantısı gerekli.':S.busy?'Komut gönderiliyor…':M.moving?'Servolar hareket ediyor…':!hw?'Komutlar yalnızca bu ekranda uygulanır.':'');
+ /* servolar */
+ for(var i=0;i<2;i++){var p=M.pwm?M.pwm[i]:null,s;
+  T('s'+i+'p',p!=null?p+' µs':'-');var g=$('s'+i+'g');g.hidden=p==null;if(p!=null)g.style.left=Math.min(100,Math.max(0,(p-1000)/10))+'%';
+  if(M.moving)s=M.lock==='open'?'Açılıyor':'Kapanıyor';
+  else if(p!=null)s=Math.abs(p-C.stop[i])<=15?'Duruyor':'Dönüyor';
+  else s=(!lv||M.lock==='unknown')?'Bilinmiyor':'Duruyor (tahmini)';
+  T('s'+i+'s',s)}
+ /* sistem */
+ T('sysTag',hw?'':'sanal veri');
+ T('bv',I&&I.v!=null?I.v.toFixed(2)+' V':'-');T('bp',pc!=null?Math.round(pc)+' %':'-');
+ var bb=$('bb');bb.style.width=(pc!=null?Math.max(0,Math.min(100,pc)):0)+'%';bb.className=pc!=null&&pc<20?'err':pc!=null&&pc<40?'warn':'';
+ T('up',I&&I.up!=null?fmtUp(I.up):'-');T('cl',I&&I.cl!=null?I.cl:'-');T('mem',I&&I.mem!=null?Math.round(I.mem/1024)+' KB':'-');
+ /* bağlantı */
+ T('cAddr',!hw?'kullanılmıyor':dev?location.host+' (aynı kaynak)':addr.replace(/^https?:\/\//,''));
+ T('cLast',hw&&S.last?hms(S.last):'-');T('cFail',hw?S.fails:'-');T('cTel',!hw?'-':S.conn==='online'?'Var':'Yok');
+ $('bTest').disabled=!hw||S.beating;$('aIn').disabled=!hw||dev;$('aBtn').disabled=!hw||dev;
+ if(document.activeElement!==$('aIn'))$('aIn').value=dev?location.host:addr.replace(/^https?:\/\//,'')}
+
+/* Olaylar */
+function setMode(m){if(S.mode===m)return;S.mode=m;
+ log('INFO',m==='sim'?'Mod: simülasyon. Komutlar donanıma gönderilmez.':'Mod: gerçek donanım. Komutlar ESP32’ye gönderilir.',m==='sim'?'SIM':'HW');
+ if(m==='hw'){S.conn='idle';beat()}render()}
+$('mHw').onclick=function(){setMode('hw')};$('mSim').onclick=function(){setMode('sim')};
+$('bDrop').onclick=function(){act('drop')};$('bLock').onclick=function(){act('lock')};
+$('bLoad').onclick=function(){var M=S[S.mode];M.loaded=true;log('INFO','Yük takıldı (operatör onayı, panel kaydı)');render()};
+$('bTest').onclick=function(){beat(true)};
+$('bGuide').onclick=function(){showM('Bağlantı rehberi',GUIDE,[{t:'Kapat',f:function(){closeM(false)}}])};
+$('mdl').onclick=function(e){if(e.target===$('mdl'))closeM(false)};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('mdl').hidden)closeM(false)});
+$('aForm').onsubmit=function(e){e.preventDefault();var v=$('aIn').value.trim();
+ if(!/^(https?:\/\/)?[\w.-]+(:\d{1,5})?$/.test(v)){log('ERR','Geçersiz adres: '+v,'HW');return}
+ if(!/^https?:\/\//i.test(v))v='http://'+v;addr=v;store.s('aero_addr',v);S.conn='idle';S.fails=0;log('INFO','Cihaz adresi güncellendi: '+v,'HW');render();beat(true)};
+Array.prototype.forEach.call(document.querySelectorAll('[data-f]'),function(b){b.onclick=function(){S.filt=b.dataset.f;Array.prototype.forEach.call(document.querySelectorAll('[data-f]'),function(x){x.setAttribute('aria-pressed',x===b)});rLog()}});
+$('bClr').onclick=function(){L.length=0;rLog()};
+$('bCopy').onclick=async function(){var tx=L.slice().reverse().map(function(e){return hms(e.t)+' ['+e.src+'] '+e.lv+' '+e.msg}).join('\n'),ok=false;
+ try{await navigator.clipboard.writeText(tx);ok=true}catch(_){var a=document.createElement('textarea');a.value=tx;a.style.cssText='position:fixed;opacity:0';document.body.append(a);a.select();try{ok=document.execCommand('copy')}catch(__){}a.remove()}
+ log(ok?'INFO':'WARN',ok?'Kayıtlar panoya kopyalandı':'Panoya kopyalanamadı; tarayıcı izin vermiyor')};
+
+/* Başlat */
+function tick(){T('clk',hms(new Date()));
+ var e=(Date.now()-S.t0)/1000,p=Math.max(5,82-e/120);S.sim.info={v:6+p/100*2.4,p:p,up:e,cl:1,mem:214000};render()}
+if(blocked()){S.mode='sim';log('WARN','Sayfa HTTPS üzerinde: tarayıcı gerçek ESP32 kontrolünü engeller. Simülasyon modu açıldı.','SIM')}
+else log('INFO','Panel başlatıldı. Mod: gerçek donanım.','HW');
+tick();setInterval(tick,1000);
+if(S.mode==='hw')beat();
+setInterval(function(){if(!document.hidden)beat()},C.poll);
+})();
+</script>
+</body>
+</html>
